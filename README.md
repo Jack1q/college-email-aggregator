@@ -9,6 +9,6 @@ Stores every college email you've ever received in a csv spreadsheet
 2) Open up your command line and cd into this directory. 
 3) Run this command:
 ```
-python collegeemails.py
+python3 collegeemails.py
 ```
 The emails will be stored in data.csv. It might take a little bit for everything to get collected if you have a lot of them.
