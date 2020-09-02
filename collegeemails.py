@@ -6,6 +6,7 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 import base64 # for decoding messages
 import csv
+import sys
 
 # If modifying these scopes, delete the file token.pickle.
 SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
@@ -36,14 +37,14 @@ def crawl_mail(service, id, token='', mail=[]):
     for message in response['messages']:
         msg = service.users().messages().get(userId='me',id=message['id']).execute()
         try:
-            msg_data = base64.urlsafe_b64decode(msg['payload']['parts'][0]['body']['data'].encode('UTF8'))
-            for x in msg['payload']['headers']:
-                if x['name'] == 'From':
-                    sender_email = x['value'][x['value'].index('<')+1:x['value'].rindex('>')].strip()
-                    if sender_email.endswith('.edu'):
-                        with open('data.csv','a+',newline='') as data_file:
-                            print(sender_email, msg_data)
-                            csv.writer(data_file, delimiter=',').writerow([sender_email, msg_data])
+            msg_data = str(base64.urlsafe_b64decode(msg['payload']['parts'][0]['body']['data'].encode('UTF8')))
+            if len(sys.argv) == 1 or (sys.argv[1] == 'waiver-only' and 'waiver' in msg_data):
+                for x in msg['payload']['headers']:
+                    if x['name'] == 'From':
+                        sender_email = x['value'][x['value'].index('<')+1:x['value'].rindex('>')].strip()
+                        if sender_email.endswith('.edu'):
+                            with open('data.csv','a+',newline='') as data_file:
+                                csv.writer(data_file, delimiter=',').writerow([sender_email, msg_data])
         except:
             pass
     if 'nextPageToken' in response:
